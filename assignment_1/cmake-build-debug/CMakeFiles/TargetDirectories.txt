@@ -1,0 +1,3 @@
+/Users/matejgerek/Desktop/school/software-security-assignments/assignment_1/cmake-build-debug/CMakeFiles/zadanie1.dir
+/Users/matejgerek/Desktop/school/software-security-assignments/assignment_1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/matejgerek/Desktop/school/software-security-assignments/assignment_1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
