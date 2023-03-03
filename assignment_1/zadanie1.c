@@ -45,72 +45,83 @@ void vigenere_decrypt(char *ciphertext, char *key, char *plaintext) {
     plaintext[ciphertext_length] = NULL_TERMINATOR;
 }
 
-int main(int argc, char *argv[]) {
-    int s_flag = 0;
-    int d_flag = 0;
+typedef struct {
+    int s_flag;
+    int d_flag;
+    char *password_value;
+    char *input_file_value;
+    char *output_file_value;
+} Arguments;
 
-    char *password_value = NULL;
-    char *input_file_value = NULL;
-    char *output_file_value = NULL;
+void parse_argument(Arguments *args, char *arg, int *i, int argc, char *argv[]) {
+    switch (arg[1]) {
+        case 's':
+            args->s_flag = 1;
+            break;
+        case 'd':
+            args->d_flag = 1;
+            break;
+        case 'p':
+            if (*i + 1 < argc) {
+                args->password_value = argv[*i + 1];
+                (*i)++;
+            } else {
+                printf(ERROR_MESSAGE);
+                exit(1);
+            }
+            break;
+        case 'i':
+            if (*i + 1 < argc) {
+                args->input_file_value = argv[*i + 1];
+                (*i)++;
+            } else {
+                printf(ERROR_MESSAGE);
+                exit(1);
+            }
+            break;
+        case 'o':
+            if (*i + 1 < argc) {
+                args->output_file_value = argv[*i + 1];
+                (*i)++;
+            } else {
+                printf(ERROR_MESSAGE);
+                exit(1);
+            }
+            break;
+        default:
+            printf(ERROR_MESSAGE);
+            exit(1);
+    }
+}
+
+Arguments parse_arguments(int argc, char *argv[]) {
+    Arguments args = {0};
 
     for (int i = 1; i < argc; i++) {
         char *arg = argv[i];
-        switch (arg[0]) {
-            case '-':
-                switch (arg[1]) {
-                    case 's':
-                        s_flag = 1;
-                        break;
-                    case 'd':
-                        d_flag = 1;
-                        break;
-                    case 'p':
-                        if (i + 1 < argc) {
-                            password_value = argv[i + 1];
-                            i++;
-                        } else {
-                            printf(ERROR_MESSAGE);
-                            return 1;
-                        }
-                        break;
-                    case 'i':
-                        if (i + 1 < argc) {
-                            input_file_value = argv[i + 1];
-                            i++;
-                        } else {
-                            printf(ERROR_MESSAGE);
-                            return 1;
-                        }
-                        break;
-                    case 'o':
-                        if (i + 1 < argc) {
-                            output_file_value = argv[i + 1];
-                            i++;
-                        } else {
-                            printf(ERROR_MESSAGE);
-                            return 1;
-                        }
-                        break;
-                    default:
-                        printf(ERROR_MESSAGE);
-                        break;
-                }
-                break;
-            default:
-                printf(ERROR_MESSAGE);
-                break;
+        if (arg[0] == '-') {
+            parse_argument(&args, arg, &i, argc, argv);
+        } else {
+            printf(ERROR_MESSAGE);
+            exit(1);
         }
     }
 
-    if (s_flag == 1 && d_flag == 1) {
+    if (args.s_flag == 1 && args.d_flag == 1) {
         printf(ERROR_MESSAGE);
-        return 1;
+        exit(1);
     }
 
-    if (s_flag == 0 && d_flag == 0) {
+    if (args.s_flag == 0 && args.d_flag == 0) {
         printf(ERROR_MESSAGE);
-        return 1;
+        exit(1);
     }
+
+    return args;
+}
+
+int main(int argc, char *argv[]) {
+    Arguments args = parse_arguments(argc, argv);
 
     char plaintext[100] = "Hello&$}, world!";
     char key[100] = "secret";
