@@ -6,14 +6,7 @@
 #define ASCII_SIZE 128
 #define ERROR_MESSAGE "chyba\n"
 #define NULL_TERMINATOR '\0'
-
-int update_key_index(int key_index, int key_len) {
-    key_index++;
-    if (key_index >= key_len) {
-        key_index = 0;
-    }
-    return key_index;
-}
+#define BUFFER_SIZE 1024
 
 void vigenere_encrypt(char *plaintext, char *key, char *ciphertext) {
     int plaintext_len = strlen(plaintext);
@@ -25,7 +18,10 @@ void vigenere_encrypt(char *plaintext, char *key, char *ciphertext) {
             encrypted_character = encrypted_character - ASCII_SIZE;
         }
         ciphertext[i] = (char) encrypted_character;
-        key_index = update_key_index(key_index, key_len);
+        key_index++;
+        if (key_index >= key_len) {
+            key_index = 0;
+        }
     }
     ciphertext[plaintext_len] = NULL_TERMINATOR;
 }
@@ -120,20 +116,42 @@ Arguments parse_arguments(int argc, char *argv[]) {
     return args;
 }
 
+void write_to_file(char *filename, char *text) {
+    FILE *file = fopen(filename, "w");
+    if (file == NULL) {
+        printf(ERROR_MESSAGE);
+        exit(1);
+    }
+    fprintf(file, "%s", text);
+    fclose(file);
+}
+
+void read_from_file(char *filename, char *buffer) {
+    FILE *file = fopen(filename, "r");
+    if (file == NULL) {
+        printf(ERROR_MESSAGE);
+        exit(1);
+    }
+    size_t bytes_read;
+    while ((bytes_read = fread(buffer, 1, BUFFER_SIZE, file)) != 0) {}
+    if (ferror(file)) {
+        printf(ERROR_MESSAGE);
+        fclose(file);
+        exit(1);
+    }
+    fclose(file);
+}
+
 int main(int argc, char *argv[]) {
     Arguments args = parse_arguments(argc, argv);
 
-    char plaintext[100] = "Hello&$}, world!";
-    char key[100] = "secret";
-    char ciphertext[100];
-    char decrypted_plaintext[100];
+    char buffer[BUFFER_SIZE];
+    read_from_file(args.input_file_value, buffer);
 
-    vigenere_encrypt(plaintext, key, ciphertext);
-    printf("Encrypted message: %s\n", ciphertext);
-
-    vigenere_decrypt(ciphertext, key, decrypted_plaintext);
-    printf("Decrypted message: %s\n", decrypted_plaintext);
-
+    char write_buffer[BUFFER_SIZE];
+    void (*operation)(char *, char *, char *) = args.s_flag == 1 ? vigenere_encrypt : vigenere_decrypt;
+    operation(buffer, args.password_value, write_buffer);
+    write_to_file(args.output_file_value, write_buffer);
 
     return 0;
 }
