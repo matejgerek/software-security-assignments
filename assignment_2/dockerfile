@@ -1,0 +1,13 @@
+FROM ubuntu:latest
+
+RUN apt-get update && \
+    apt-get install -y build-essential openssl && \
+    apt-get install -y libssl-dev
+
+WORKDIR /app
+
+COPY . .
+
+RUN make
+
+CMD ["./zadanie2"]
