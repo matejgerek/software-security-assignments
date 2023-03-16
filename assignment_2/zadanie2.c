@@ -93,12 +93,8 @@ int main(void) {
         return 1;
     }
 
-    bool write_success = write_users(users, num_users, key, user->index);
-    if (!write_success) {
-        printf("chyba\n");
-        return 1;
-    }
-
+    print_user(*user);
+    print_users(users, num_users);
 
     return 0;
 }
@@ -106,20 +102,14 @@ int main(void) {
 bool write_users(User users[], int num_users, char *ommit_key, int ommit_index) {
     FILE *fp = fopen("hesla.csv", "w");
     if (fp == NULL) {
+        printf("chyba\n");
         return false;
     }
 
     for (int i = 0; i < num_users; i++) {
         fprintf(fp, "%s:%s:", users[i].username, users[i].password_hash);
         for (int j = 0; j < MAX_KEYS_PER_USER; j++) {
-            if (j == ommit_index && strcmp(users[i].keys[j], ommit_key) == 0) {
-                printf("removing key %s\n", users[i].keys[j]);
-                continue; // Skip this key
-            }
-            if (j > 0) {
-                fprintf(fp, ",");
-            }
-            fprintf(fp, "%s", users[i].keys[j]);
+            fprintf(fp, "%s,", users[i].keys[j]);
         }
         fprintf(fp, "\n");
     }
@@ -131,15 +121,17 @@ bool write_users(User users[], int num_users, char *ommit_key, int ommit_index) 
 
 
 void remove_key(User *user, int index) {
-    int key_count = sizeof(user->keys) / sizeof(user->keys[0]);
-    for (int i = index; i < key_count - 1; i++) {
+    for (int i = index; i < MAX_KEYS_PER_USER - 1; i++) {
         strcpy(user->keys[i], user->keys[i + 1]);
+        user->keys[i + 1][0] = '\0';
     }
 }
 
 bool verify_key(User *user, char *key) {
     for (int i = 0; i < MAX_KEYS_PER_USER; i++) {
         if (strcmp(user->keys[i], key) == 0) {
+            printf("key found: %s \n", key);
+            remove_key(user, i);
             return true;
         }
     }
@@ -170,7 +162,6 @@ User *find_user(User users[], int num_users, char *username) {
             return &users[i];
         }
     }
-
     return NULL;
 }
 
