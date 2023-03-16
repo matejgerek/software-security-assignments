@@ -26,7 +26,7 @@ void print_user(User user);
 
 void print_users(User users[], int num_users);
 
-bool compare_passwords(char *password, char *password_hash);
+bool compare_passwords(char password[MAX_PASSWORD_LENGTH], char *password_hash);
 
 User *find_user(User users[], int num_users, char *username);
 
@@ -76,11 +76,17 @@ int main(void) {
         return 1;
     }
 
+    bool password_correct = compare_passwords(password, user->password_hash);
+
+    return 0;
+}
+
+bool compare_passwords(char password[MAX_PASSWORD_LENGTH], char *password_hash) {
     unsigned long hashed_password = hash(password);
     char hashed_password_str[256];
     sprintf(hashed_password_str, "%lu", hashed_password);
 
-    return 0;
+    return strcmp(hashed_password_str, password_hash) == 0;
 }
 
 void get_data_from_input(char *username, char *password, char *key) {
