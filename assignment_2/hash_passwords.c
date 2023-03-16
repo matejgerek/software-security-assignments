@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-unsigned long hash(unsigned char *str) {
+unsigned long hash(char *str) {
     unsigned long hash = 5381;
     int c;
 
@@ -16,13 +16,10 @@ int main() {
     char *passwords[] = {"password1", "password2", "password3", "password4", "password5"};
     int num_users = sizeof(users) / sizeof(users[0]);
 
+    // print hashed passwords
     for (int i = 0; i < num_users; i++) {
-        char input[strlen(users[i]) + strlen(passwords[i]) + 1];
-        sprintf(input, "%s%s", users[i], passwords[i]);
-
-        unsigned long hash_val = hash((unsigned char *)input);
-
-        printf("%s:%lu\n", users[i], hash_val);
+        printf("%s: %lu (%s)", users[i], hash(passwords[i]), passwords[i]);
+        printf("\n");
     }
 
     return 0;
