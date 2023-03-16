@@ -77,6 +77,10 @@ int main(void) {
     }
 
     bool password_correct = compare_passwords(password, user->password_hash);
+    if (!password_correct) {
+        printf("chyba\n");
+        return 1;
+    }
 
     return 0;
 }
