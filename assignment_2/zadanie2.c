@@ -33,7 +33,7 @@ User *find_user(User users[], int num_users, char *username);
 
 void get_data_from_input(char *username, char *password, char *key);
 
-bool write_users(User users[], int num_users, char *ommit_key, int ommit_index);
+bool write_users(User users[], int num_users);
 
 /**
  * Computes the hash value of a given string.
@@ -93,13 +93,17 @@ int main(void) {
         return 1;
     }
 
-    print_user(*user);
-    print_users(users, num_users);
+    bool write_success = write_users(users, num_users);
+    if (!write_success) {
+        printf("write failed\n");
+        printf("chyba\n");
+        return 1;
+    }
 
     return 0;
 }
 
-bool write_users(User users[], int num_users, char *ommit_key, int ommit_index) {
+bool write_users(User users[], int num_users) {
     FILE *fp = fopen("hesla.csv", "w");
     if (fp == NULL) {
         printf("chyba\n");
@@ -109,7 +113,12 @@ bool write_users(User users[], int num_users, char *ommit_key, int ommit_index) 
     for (int i = 0; i < num_users; i++) {
         fprintf(fp, "%s:%s:", users[i].username, users[i].password_hash);
         for (int j = 0; j < MAX_KEYS_PER_USER; j++) {
-            fprintf(fp, "%s,", users[i].keys[j]);
+            if (strlen(users[i].keys[j]) > 0) {
+                fprintf(fp, "%s", users[i].keys[j]);
+                if (j < MAX_KEYS_PER_USER - 1 && strlen(users[i].keys[j + 1]) > 0) {
+                    fprintf(fp, ",");
+                }
+            }
         }
         fprintf(fp, "\n");
     }
