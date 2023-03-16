@@ -11,6 +11,7 @@
 #define MAX_USERS 5
 
 typedef struct {
+    int index;
     char username[MAX_USERNAME_LENGTH];
     char password_hash[256];
     char keys[MAX_KEYS_PER_USER][MAX_KEY_LENGTH];
@@ -31,6 +32,8 @@ bool compare_passwords(char password[MAX_PASSWORD_LENGTH], char *password_hash);
 User *find_user(User users[], int num_users, char *username);
 
 void get_data_from_input(char *username, char *password, char *key);
+
+bool write_users(User users[], int num_users, char *ommit_key, int ommit_index);
 
 /**
  * Computes the hash value of a given string.
@@ -78,11 +81,70 @@ int main(void) {
 
     bool password_correct = compare_passwords(password, user->password_hash);
     if (!password_correct) {
+        printf("password not correct\n");
         printf("chyba\n");
         return 1;
     }
 
+    bool key_correct = verify_key(user, key);
+    if (!key_correct) {
+        printf("key not correct\n");
+        printf("chyba\n");
+        return 1;
+    }
+
+    bool write_success = write_users(users, num_users, key, user->index);
+    if (!write_success) {
+        printf("chyba\n");
+        return 1;
+    }
+
+
     return 0;
+}
+
+bool write_users(User users[], int num_users, char *ommit_key, int ommit_index) {
+    FILE *fp = fopen("hesla.csv", "w");
+    if (fp == NULL) {
+        return false;
+    }
+
+    for (int i = 0; i < num_users; i++) {
+        fprintf(fp, "%s:%s:", users[i].username, users[i].password_hash);
+        for (int j = 0; j < MAX_KEYS_PER_USER; j++) {
+            if (j == ommit_index && strcmp(users[i].keys[j], ommit_key) == 0) {
+                printf("removing key %s\n", users[i].keys[j]);
+                continue; // Skip this key
+            }
+            if (j > 0) {
+                fprintf(fp, ",");
+            }
+            fprintf(fp, "%s", users[i].keys[j]);
+        }
+        fprintf(fp, "\n");
+    }
+
+    fclose(fp);
+
+    return true;
+}
+
+
+void remove_key(User *user, int index) {
+    int key_count = sizeof(user->keys) / sizeof(user->keys[0]);
+    for (int i = index; i < key_count - 1; i++) {
+        strcpy(user->keys[i], user->keys[i + 1]);
+    }
+}
+
+bool verify_key(User *user, char *key) {
+    for (int i = 0; i < MAX_KEYS_PER_USER; i++) {
+        if (strcmp(user->keys[i], key) == 0) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 bool compare_passwords(char password[MAX_PASSWORD_LENGTH], char *password_hash) {
@@ -116,13 +178,15 @@ User *find_user(User users[], int num_users, char *username) {
 bool load_users(User users[], int max_num_users) {
     FILE *fp = fopen("hesla.csv", "r");
     if (fp == NULL) {
-        printf("chyba\n");
         return false;
     }
 
     char line[MAX_LINE_LENGTH];
     int user_index = 0;
     while (fgets(line, MAX_LINE_LENGTH, fp) != NULL && user_index < max_num_users) {
+        // Remove end of line character(s)
+        line[strcspn(line, "\n")] = '\0';
+
         char *token = strtok(line, ":");
         if (token == NULL) {
             continue;
@@ -146,6 +210,7 @@ bool load_users(User users[], int max_num_users) {
             key_index++;
         }
 
+        users[user_index].index = user_index;
         user_index++;
     }
 
@@ -154,11 +219,14 @@ bool load_users(User users[], int max_num_users) {
     return true;
 }
 
+
 void print_user(User user) {
     printf("Username: %s\n", user.username);
     printf("Password hash: %s\n", user.password_hash);
     printf("Keys:");
-    for (int j = 0; j < MAX_KEYS_PER_USER; j++) {
+    int key_count = sizeof(user.keys) / sizeof(user.keys[0]);;
+    printf("key count: %d\n", key_count);
+    for (int j = 0; j < key_count; j++) {
         if (user.keys[j][0] != '\0') {
             printf(" %s", user.keys[j]);
         }
