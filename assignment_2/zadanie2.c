@@ -68,8 +68,6 @@ int main(void) {
     char username[MAX_USERNAME_LENGTH];
     char password[MAX_PASSWORD_LENGTH];
     char key[MAX_KEY_LENGTH];
-    int found = 0;
-
 
     printf("meno: ");
     scanf("%s", username);
