@@ -60,8 +60,6 @@ int main(void) {
 
     if (load_users(users, MAX_USERS)) {
         num_users = sizeof(users) / sizeof(users[0]);
-        // TODO: Remove
-        printf("%d users loaded from file\n", num_users);
     } else {
         printf("chyba\n");
         return 1;
