@@ -30,6 +30,8 @@ bool compare_passwords(char *password, char *password_hash);
 
 User *find_user(User users[], int num_users, char *username);
 
+void get_data_from_input(char *username, char *password, char *key);
+
 /**
  * Computes the hash value of a given string.
  *
@@ -68,13 +70,7 @@ int main(void) {
     char username[MAX_USERNAME_LENGTH];
     char password[MAX_PASSWORD_LENGTH];
     char key[MAX_KEY_LENGTH];
-
-    printf("meno: ");
-    scanf("%s", username);
-    printf("heslo: ");
-    scanf("%s", password);
-    printf("overovaci kluc: ");
-    scanf("%s", key);
+    get_data_from_input(username, password, key);
 
     User *user = find_user(users, num_users, username);
     if (user == NULL) {
@@ -87,6 +83,15 @@ int main(void) {
     sprintf(hashed_password_str, "%lu", hashed_password);
 
     return 0;
+}
+
+void get_data_from_input(char *username, char *password, char *key) {
+    printf("meno: ");
+    scanf("%s", username);
+    printf("heslo: ");
+    scanf("%s", password);
+    printf("overovaci kluc: ");
+    scanf("%s", key);
 }
 
 User *find_user(User users[], int num_users, char *username) {
