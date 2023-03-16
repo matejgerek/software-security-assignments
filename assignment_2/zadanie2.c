@@ -3,10 +3,10 @@
 #include <string.h>
 #include <stdbool.h>
 
-#define MAX_USERNAME_LENGTH 50
-#define MAX_PASSWORD_LENGTH 50
+#define MAX_USERNAME_LENGTH 256
+#define MAX_PASSWORD_LENGTH 256
 #define MAX_LINE_LENGTH 200
-#define MAX_KEY_LENGTH 5
+#define MAX_KEY_LENGTH 256
 #define MAX_KEYS_PER_USER 10
 #define MAX_USERS 5
 
@@ -41,7 +41,7 @@ User *find_user(User users[], int num_users, char *username);
  *
  * @return The hash value of the input string.
  */
-unsigned long hash(unsigned char *str) {
+unsigned long hash(char *str) {
     unsigned long hash = 5381;
     int c;
 
@@ -69,7 +69,6 @@ int main(void) {
     char password[MAX_PASSWORD_LENGTH];
     char key[MAX_KEY_LENGTH];
     int found = 0;
-    unsigned long hashed_key, file_key;
 
 
     printf("meno: ");
@@ -85,9 +84,12 @@ int main(void) {
         return 1;
     }
 
+    unsigned long hashed_password = hash(password);
+    char hashed_password_str[256];
+    sprintf(hashed_password_str, "%lu", hashed_password);
+
     return 0;
 }
-
 
 User *find_user(User users[], int num_users, char *username) {
     for (int i = 0; i < num_users; i++) {
@@ -97,12 +99,6 @@ User *find_user(User users[], int num_users, char *username) {
     }
 
     return NULL;
-}
-
-
-bool compare_passwords(char *password, char *password_hash) {
-    unsigned long hash_val = hash((unsigned char *) password);
-    return hash_val == atol(password_hash);
 }
 
 
@@ -131,7 +127,6 @@ bool load_users(User users[], int max_num_users) {
         }
         strcpy(users[user_index].password_hash, token);
 
-        // Copy keys
         int key_index = 0;
         token = strtok(NULL, ",");
         while (token != NULL && key_index < MAX_KEYS_PER_USER) {
